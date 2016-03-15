@@ -21,7 +21,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author Zil
+ * @author Ken Miller, 013068183
  */
 public class SQLDatabase 
 {
@@ -50,6 +50,7 @@ public class SQLDatabase
     private boolean studioExists;
     private boolean groupExists;
     private String buffer;
+    private String[] tempArray;
     
     public SQLDatabase()
     {
@@ -111,22 +112,10 @@ public class SQLDatabase
             }//end finally try
         }//end try
     }
-    public void testConnection() throws SQLException
+    public boolean dbExists() throws SQLException
     {
         try
         {
-            if(!conn.isClosed())
-            {
-                System.out.println("CONNECTION WORKS");
-            }
-        }
-        catch(SQLException e)
-        {
-            System.out.println("NOT CONNECTED");
-        }
-    }
-    public boolean dbExists() throws SQLException
-    {
         conn = DriverManager.getConnection(DB_URL);
         DatabaseMetaData md = conn.getMetaData();
             rs = md.getTables(null, null, "%", null);
@@ -142,11 +131,13 @@ public class SQLDatabase
                 if(DBExists == true)
                     break;
             }
-            return DBExists;
-    }
-    public void createAlbumsTable()
-    {
-      
+           
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+         return DBExists;
     }
     public void listAlbumTitles() throws SQLException
     {
@@ -173,6 +164,7 @@ public class SQLDatabase
     }
     public void listAllAlbumData() throws SQLException
     {
+        try{
         System.out.println("Type album name for more information: " );
         String albumName = in.nextLine();
         conn = DriverManager.getConnection(DB_URL);
@@ -182,42 +174,47 @@ public class SQLDatabase
         pstmt.setString(1, albumName);
         rs = pstmt.executeQuery();
         rsmd = rs.getMetaData();
-        //for(int i = 1; i < rsmd.getColumnCount(); i++)
-        System.out.println(rsmd.getColumnName(1)+ "\t" + 
-                rsmd.getColumnName(2)+ "\t" + 
-                rsmd.getColumnName(3)+ "\t" + 
-                rsmd.getColumnName(4)+ "\t" + 
-                rsmd.getColumnName(5)+ "\t" + 
-                rsmd.getColumnName(6)+ "\t" + 
-                rsmd.getColumnName(7)+ "\t" + 
-                rsmd.getColumnName(8)+ "\t" + 
-                rsmd.getColumnName(9)+ "\t" + 
-                rsmd.getColumnName(10)+ "\t" + 
-                rsmd.getColumnName(11)+ "\t" + 
-                rsmd.getColumnName(12)+ "\t" 
+        System.out.println(rsmd.getColumnName(1)+ "\t\t" + 
+                rsmd.getColumnName(2)+ "\t\t" + 
+                rsmd.getColumnName(3)+ "\t\t" + 
+                rsmd.getColumnName(4)+ "\t\t" + 
+                rsmd.getColumnName(5)+ "\t\t" + 
+                rsmd.getColumnName(6)+ "\t\t" + 
+                rsmd.getColumnName(7)+ "\t\t" + 
+                rsmd.getColumnName(8)+ "\t\t" + 
+                rsmd.getColumnName(9)+ "\t\t" + 
+                rsmd.getColumnName(10)+ "\t\t" + 
+                rsmd.getColumnName(11)+ "\t\t" + 
+                rsmd.getColumnName(12)+ "\t\t" 
                 );
-        System.out.println("--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
+
+        System.out.println("----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------");
         while(rs.next())
+        {       
+            System.out.println(rs.getString(1)+ "\t\t" +
+                    rs.getString(2)+ "\t\t" +
+                    rs.getString(3)+ "\t\t" +
+                    rs.getString(4)+ "\t\t" +
+                    rs.getString(5)+ "\t\t" +
+                    rs.getString(6)+ "\t\t" +
+                    rs.getString(7)+ "\t\t" +
+                    rs.getString(8)+ "\t\t" +
+                    rs.getString(9)+ "\t\t" +
+                    rs.getString(10)+ "\t\t" +
+                    rs.getString(11)+ "\t\t" +
+                    rs.getString(12)+ "\t\t" );
+        }
+        }
+        catch(SQLException e)
         {
-            System.out.println(rs.getString(1)+ "\t" +
-                    rs.getString(2)+ "\t" +
-                    rs.getString(3)+ "\t" +
-                    rs.getString(4)+ "\t" +
-                    rs.getString(5)+ "\t" +
-                    rs.getString(6)+ "\t" +
-                    rs.getString(7)+ "\t" +
-                    rs.getString(8)+ "\t" +
-                    rs.getString(9)+ "\t" +
-                    rs.getString(10)+ "\t" +
-                    rs.getString(11)+ "\t" +
-                    rs.getString(12)+ "\t" );
+            e.printStackTrace();
         }
     }
     public void insertAlbum() throws SQLException
     {
         studioExists = false;
         groupExists = false;
-        System.out.println("Insert the following information...");
+        System.out.println("Insert the following information for a new album...");
         System.out.println("Album: " );
         String album = in.nextLine();
         System.out.println("Group: " );
@@ -227,6 +224,8 @@ public class SQLDatabase
         System.out.println("Date Recorded... " );
         System.out.println("Year YYYY: " );
         int year = in.nextInt();
+        if(year > 1900)
+            year-=1900;
         System.out.println("Month MM: ");
         int month = in.nextInt();
         System.out.println("Day DD: " );
@@ -247,13 +246,13 @@ public class SQLDatabase
             rsmd = rs.getMetaData();
             while(rs.next())
             {   
-                System.out.println("StudioName: " + studioName);
-                System.out.println("RS: " + rs.getString(1));
+                //System.out.println("StudioName: " + studioName);
+                //System.out.println("RS: " + rs.getString(1));
                 String temp = rs.getString(1);
                 if(studioName.equals(temp))
                 {
-                    System.out.println("IT EXISTS");
                     studioExists = true;
+                    break;
                 }
                 else
                     studioExists = false;                
@@ -264,13 +263,13 @@ public class SQLDatabase
             rsmd = rs.getMetaData();
             while(rs.next())
             {   
-                System.out.println("groupName: " + groupName);
-                System.out.println("RS: " + rs.getString(1));
+                //System.out.println("groupName: " + groupName);
+                //System.out.println("RS: " + rs.getString(1));
                 String temp = rs.getString(1);
                 if(groupName.equals(temp))
                 {
-                    System.out.println("IT EXISTS");
                     groupExists = true;
+                    break;
                 }
                 else
                     groupExists = false;
@@ -393,33 +392,83 @@ public class SQLDatabase
     }
     public String[] gatherStudioNames() throws SQLException
     {
-        conn = DriverManager.getConnection(DB_URL);
-        stmt = conn.createStatement(); 
-        //check to see if the studio already exists
-        sql = "SELECT COUNT(*) AS COUNT FROM recordingstudios";
-        pstmt = conn.prepareStatement(sql);
-        rs = pstmt.executeQuery();
-        rsmd = rs.getMetaData();
-        int numbRows = 0;
-        while(rs.next()) 
+        try
         {
-               numbRows = rs.getInt("COUNT");
+            conn = DriverManager.getConnection(DB_URL);
+            stmt = conn.createStatement(); 
+            //check to see if the studio already exists
+            sql = "SELECT COUNT(*) AS COUNT FROM recordingstudios";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            rsmd = rs.getMetaData();
+            int numbRows = 0;
+            while(rs.next()) 
+            {
+                   numbRows = rs.getInt("COUNT");
+            }
+            tempArray = new String[numbRows];
+            
+            sql = "SELECT studioname FROM recordingstudios";
+
+            //sql = "SELECT DISTINCT studioname FROM recordingstudios NATURAL JOIN albums";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            rsmd = rs.getMetaData();
+            int i = 0;
+            while(rs.next())
+            {
+                tempArray[i]= rs.getString(1);
+                
+                i++;
+            }
         }
-        String[] temp = new String[numbRows];
-        sql = "SELECT studioname FROM recordingstudios";
-        pstmt = conn.prepareStatement(sql);
-        rs = pstmt.executeQuery();
-        rsmd = rs.getMetaData();
-        int i = 0;
-        while(rs.next())
+        catch(SQLException e)
         {
-            temp[i]= rs.getString(1);
-            i++;
+            e.printStackTrace();
         }
-        return temp;
+        return tempArray;
+    }
+    public String[] gatherStudioNamesToReplace() throws SQLException
+    {
+        try
+        {
+            conn = DriverManager.getConnection(DB_URL);
+            stmt = conn.createStatement(); 
+            //check to see if the studio already exists
+            sql = "SELECT COUNT(*) AS COUNT FROM recordingstudios";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            rsmd = rs.getMetaData();
+            int numbRows = 0;
+            while(rs.next()) 
+            {
+                   numbRows = rs.getInt("COUNT");
+            }
+            tempArray = new String[numbRows];
+            /*
+            sql = "SELECT studioname FROM recordingstudios";
+*/
+            sql = "SELECT DISTINCT studioname FROM recordingstudios NATURAL JOIN albums";
+            pstmt = conn.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            rsmd = rs.getMetaData();
+            int i = 0;
+            while(rs.next())
+            {
+                tempArray[i]= rs.getString(1);
+                
+                i++;
+            }
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return tempArray;
     }
     public String[] gatherGroupNames() throws SQLException
     {        
+        try{
         conn = DriverManager.getConnection(DB_URL);
         stmt = conn.createStatement(); 
         //check to see if the studio already exists
@@ -432,7 +481,7 @@ public class SQLDatabase
         {
                numbRows = rs.getInt("COUNT");
         }
-        String[] temp = new String[numbRows];
+        tempArray = new String[numbRows];
         sql = "SELECT groupname FROM recordinggroups";
         pstmt = conn.prepareStatement(sql);
         rs = pstmt.executeQuery();
@@ -440,10 +489,15 @@ public class SQLDatabase
         int i = 0;
         while(rs.next())
         {
-            temp[i]= rs.getString(1);
+            tempArray[i]= rs.getString(1);
             i++;
         }
-        return temp;
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+        return tempArray;
     }
     public void insertStudio() throws SQLException
     {
@@ -451,6 +505,37 @@ public class SQLDatabase
         System.out.println("Studio name: " );
         studioName = in.nextLine();
             
+        System.out.println("Address: " );
+        studioAddress = in.nextLine();
+        System.out.println("Owner: " );
+        studioOwner = in.nextLine();
+        System.out.println("Phone: " );
+        studioPhone = in.nextLine();
+        try
+        {
+            conn = DriverManager.getConnection(DB_URL);
+            stmt = conn.createStatement(); 
+            sql = "INSERT INTO recordingstudios VALUES(?,?,?,?)";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, studioName);
+            pstmt.setString(2, studioAddress);
+            pstmt.setString(3, studioOwner);
+            pstmt.setString(4, studioPhone);
+            pstmt.executeUpdate();
+            stmt.close();
+            conn.close();
+            
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+        
+    }
+    public void insertStudio(String sName) throws SQLException
+    {
+        
+        studioName = sName;            
         System.out.println("Address: " );
         studioAddress = in.nextLine();
         System.out.println("Owner: " );
@@ -510,59 +595,72 @@ public class SQLDatabase
             e.printStackTrace();
         }
     }
-    public void resetDatabase() throws SQLException
+    public void replaceStudio(String nameToReplace, String newStudioName) throws SQLException
     {
-        String s            = new String();
-        StringBuffer sb = new StringBuffer();
- 
+        try{
+        conn = DriverManager.getConnection(DB_URL);
+        stmt = conn.createStatement(); 
+        sql = "UPDATE albums SET studioName = ? WHERE studioName =?";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, newStudioName);
+        pstmt.setString(2, nameToReplace);
+        pstmt.executeUpdate();
+        //Print out albums with new studios
+        sql = "SELECT * FROM albums WHERE studioname = ?";
+        pstmt = conn.prepareStatement(sql);
+        pstmt.setString(1, newStudioName);
+        rs = pstmt.executeQuery();
+        rsmd = rs.getMetaData();
+        System.out.println(rsmd.getColumnName(1)+ "\t" + 
+                rsmd.getColumnName(2)+ "\t" + 
+                rsmd.getColumnName(3)+ "\t" + 
+                rsmd.getColumnName(4)+ "\t" + 
+                rsmd.getColumnName(5)+ "\t" + 
+                rsmd.getColumnName(6)
+                );
+        System.out.println("---------------------------------------------------------------------------------------------------------------");
+        
+        while(rs.next())
+        {
+            System.out.println(rs.getString(1)+ "\t" +
+                    rs.getString(2)+ "\t" +
+                    rs.getInt(3)+ "\t" +
+                    rs.getString(4)+ "\t" +
+                    rs.getDate(5)+ "\t" +
+                    rs.getInt(6));
+        }
+        stmt.close();
+        conn.close();
+        }
+        catch(SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    public void deleteAlbum() throws SQLException
+    {
         try
         {
-            FileReader fr = new FileReader(new File("C:/Users/Zil/Documents/GitHub/CECS323JDBCProject/build/classes/cecs/pkg323/ken/miller/pkg013068183/java/project/DDLStatement.sql"));
-            
- 
-            BufferedReader br = new BufferedReader(fr);
- 
-            while((s = br.readLine()) != null)
-            {
-                sb.append(s);
-            }
-            br.close();
- 
-            // here is our splitter ! We use ";" as a delimiter for each request
-            // then we are sure to have well formed statements
-            String[] inst = sb.toString().split(";");
- 
+            System.out.println("----------------------------");
+            listAlbumTitles();
+            System.out.println("----------------------------");
+            System.out.println("Type album to delete from above: ");
+            String aName = in.nextLine();
             conn = DriverManager.getConnection(DB_URL);
-            stmt = conn.createStatement();
- 
-            for(int i = 0; i<inst.length; i++)
-            {
-                // we ensure that there is no spaces before or after the request string
-                // in order to not execute empty statements
-                if(!inst[i].trim().equals(""))
-                {
-                    sql = inst[i].toString();
-                    pstmt = conn.prepareStatement(sql);
-                    pstmt.execute();
-                    System.out.println(">>"+inst[i]);
-                }
-            }
-   
+            stmt = conn.createStatement(); 
+            sql = "DELETE FROM albums WHERE albumTitle = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, aName);
+            pstmt.executeUpdate();
+            System.out.println("Album Deleted - Printing all albums");
+            System.out.println("---------------------------------------");
+            listAlbumTitles();     
+            stmt.close();
+            conn.close();            
         }
-        
-        catch(Exception e)
+        catch(SQLException e)
         {
-            System.out.println("*** Error : "+e.toString());
-            System.out.println("*** ");
-            System.out.println("*** Error : ");
             e.printStackTrace();
-            System.out.println("################################################");
-            System.out.println(sb.toString());
-        }
- 
-    }
-    public void test()
-    {
-        System.out.println("TEST");
-    }
+        }        
+    }    
 }
